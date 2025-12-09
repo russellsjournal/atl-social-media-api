@@ -1,0 +1,46 @@
+[
+  {
+    "name": "ATL Coffee Co.",
+    "neighborhood": "Midtown",
+    "category": "Cafe",
+    "website": "http://atlcoffee.example",
+    "google_maps_url": "http://maps.example/atlcoffee",
+    "has_instagram": true,
+    "has_facebook": false,
+    "reviews_count": 120,
+    "avg_rating": 4.5
+  },
+  {
+    "name": "Peachtree Books",
+    "neighborhood": "Downtown",
+    "category": "Bookstore",
+    "website": null,
+    "google_maps_url": null,
+    "has_instagram": false,
+    "has_facebook": true,
+    "reviews_count": 22,
+    "avg_rating": 4.0
+  },
+  {
+    "name": "Eastside Barbers",
+    "neighborhood": "Eastside",
+    "category": "Barbershop",
+    "website": "http://eastsidebarbers.example",
+    "google_maps_url": null,
+    "has_instagram": true,
+    "has_facebook": true,
+    "reviews_count": 48,
+    "avg_rating": 4.2
+  },
+  {
+    "name": "Sunset Yoga",
+    "neighborhood": "West End",
+    "category": "Wellness",
+    "website": "http://sunsetyoga.example",
+    "google_maps_url": "http://maps.example/sunsetyoga",
+    "has_instagram": false,
+    "has_facebook": false,
+    "reviews_count": 8,
+    "avg_rating": 3.8
+  }
+]
