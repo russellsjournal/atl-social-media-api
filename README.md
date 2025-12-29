@@ -50,5 +50,3 @@ Notes
 - The backend uses an in-memory DB (`backend_api.database.InMemoryDB`) for simplicity. Data is not persisted between runs.
 - If PowerShell blocks script execution, use `py` to run scripts or adjust `Set-ExecutionPolicy` for your user.
 
-License
-- No license specified. Add a LICENSE file if you plan to publish.
