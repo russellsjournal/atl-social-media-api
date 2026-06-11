@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atl-social-media-api"
+version = "0.1.0"
+description = "Lightweight FastAPI service and tools for collecting and scoring local business leads."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+
+[tool.setuptools.packages.find]
+include = ["backend_api*"]

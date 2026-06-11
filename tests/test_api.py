@@ -1,62 +1,21 @@
-import os
-import json
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
-import pytest
+from fastapi.testclient import TestClient
 
-API_URL = os.environ.get("API_URL", "http://127.0.0.1:8000").rstrip("/")
+from backend_api.database import db
+from backend_api.main import app
 
 
-def _ping():
-    try:
-        with urlopen(API_URL + "/health", timeout=2) as r:
-            return r.status == 200
-    except Exception:
-        return False
-
-
-pytestmark = pytest.mark.skipif(not _ping(), reason=f"API not running at {API_URL}")
-
-
-def _request(method: str, path: str, payload=None):
-    url = API_URL + path
-    data = None
-    headers = {"Accept": "application/json"}
-    if payload is not None:
-        data = json.dumps(payload).encode("utf-8")
-        headers["Content-Type"] = "application/json"
-    req = Request(url, data=data, headers=headers, method=method)
-    try:
-        with urlopen(req, timeout=5) as resp:
-            body = resp.read().decode("utf-8")
-            try:
-                parsed = json.loads(body) if body else None
-            except Exception:
-                parsed = body
-            return resp.status, parsed
-    except HTTPError as e:
-        try:
-            body = e.read().decode()
-            parsed = json.loads(body)
-        except Exception:
-            parsed = None
-        return e.code, parsed
-    except URLError as e:
-        pytest.skip(f"Network error communicating with API: {e}")
+client = TestClient(app)
 
 
 def setup_function():
-    # try to clean existing businesses by listing and deleting
-    status, body = _request("GET", "/businesses")
-    if status == 200 and isinstance(body, list):
-        for b in body:
-            _request("DELETE", f"/businesses/{b.get('id')}")
+    db._businesses.clear()
+    db._next_id = 1
 
 
 def test_health():
-    status, body = _request("GET", "/health")
-    assert status == 200
-    assert body == {"status": "ok"}
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 
 
 def test_crud_business_lifecycle_and_filters():
@@ -72,8 +31,9 @@ def test_crud_business_lifecycle_and_filters():
         "avg_rating": 4.0,
     }
 
-    status, created1 = _request("POST", "/businesses", payload1)
-    assert status == 200
+    response = client.post("/businesses", json=payload1)
+    assert response.status_code == 200
+    created1 = response.json()
     assert created1["name"] == payload1["name"]
     assert "id" in created1
     assert "lead_score" in created1
@@ -89,33 +49,35 @@ def test_crud_business_lifecycle_and_filters():
         "reviews_count": 2,
         "avg_rating": 3.5,
     }
-    status, created2 = _request("POST", "/businesses", payload2)
-    assert status == 200
+    response = client.post("/businesses", json=payload2)
+    assert response.status_code == 200
+    created2 = response.json()
 
-    status, all_biz = _request("GET", "/businesses")
-    assert status == 200
+    response = client.get("/businesses")
+    assert response.status_code == 200
+    all_biz = response.json()
     assert isinstance(all_biz, list)
-    assert len(all_biz) >= 2
+    assert len(all_biz) == 2
 
-    status, filtered = _request("GET", "/businesses?neighborhood=North")
-    assert status == 200
-    assert all((b.get("neighborhood") == "North" for b in filtered))
+    response = client.get("/businesses?neighborhood=North")
+    assert response.status_code == 200
+    assert all((b.get("neighborhood") == "North" for b in response.json()))
 
-    status, filtered_cat = _request("GET", "/businesses?category=Bookstore")
-    assert status == 200
-    assert all((b.get("category") == "Bookstore" for b in filtered_cat))
+    response = client.get("/businesses?category=Bookstore")
+    assert response.status_code == 200
+    assert all((b.get("category") == "Bookstore" for b in response.json()))
 
-    status, got = _request("GET", f"/businesses/{created1['id']}")
-    assert status == 200
-    assert got["id"] == created1["id"]
+    response = client.get(f"/businesses/{created1['id']}")
+    assert response.status_code == 200
+    assert response.json()["id"] == created1["id"]
 
-    status, updated = _request("PUT", f"/businesses/{created1['id']}", {"name": "Updated Name"})
-    assert status == 200
-    assert updated["name"] == "Updated Name"
+    response = client.put(f"/businesses/{created1['id']}", json={"name": "Updated Name"})
+    assert response.status_code == 200
+    assert response.json()["name"] == "Updated Name"
 
-    status, deleted = _request("DELETE", f"/businesses/{created2['id']}")
-    assert status == 200
-    assert deleted == {"deleted": True}
+    response = client.delete(f"/businesses/{created2['id']}")
+    assert response.status_code == 200
+    assert response.json() == {"deleted": True}
 
-    status, _ = _request("GET", f"/businesses/{created2['id']}")
-    assert status == 404
+    response = client.get(f"/businesses/{created2['id']}")
+    assert response.status_code == 404

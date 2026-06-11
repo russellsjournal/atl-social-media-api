@@ -1,13 +1,21 @@
 """
 Project demo script: exercises the FastAPI app in-process using TestClient.
-No running uvicorn server required — this uses FastAPI's TestClient to make requests
-against the `backend_api.main:app` object and demonstrates create/list/get/update/delete
-and exporting lead scores to CSV.
+No running uvicorn server required. This uses FastAPI's TestClient to make
+requests against the `backend_api.main:app` object and demonstrates
+create/list/get/update/delete and exporting lead scores to CSV.
 """
 import csv
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 from fastapi.testclient import TestClient
-from backend_api.main import app
+
 from backend_api.database import db
+from backend_api.main import app
 
 client = TestClient(app)
 
@@ -46,31 +54,31 @@ SAMPLE = [
 def create_demo_data():
     created = []
     for item in SAMPLE:
-        r = client.post("/businesses", json=item)
-        assert r.status_code == 200, f"create failed: {r.status_code} {r.text}"
-        created.append(r.json())
+        response = client.post("/businesses", json=item)
+        assert response.status_code == 200, f"create failed: {response.status_code} {response.text}"
+        created.append(response.json())
     return created
 
 
 def list_businesses():
-    r = client.get("/businesses")
-    assert r.status_code == 200
-    return r.json()
+    response = client.get("/businesses")
+    assert response.status_code == 200
+    return response.json()
 
 
-def get_business(bid):
-    r = client.get(f"/businesses/{bid}")
-    return r.status_code, r.json() if r.status_code == 200 else None
+def get_business(business_id):
+    response = client.get(f"/businesses/{business_id}")
+    return response.status_code, response.json() if response.status_code == 200 else None
 
 
-def update_business(bid, payload):
-    r = client.put(f"/businesses/{bid}", json=payload)
-    return r.status_code, r.json() if r.status_code == 200 else None
+def update_business(business_id, payload):
+    response = client.put(f"/businesses/{business_id}", json=payload)
+    return response.status_code, response.json() if response.status_code == 200 else None
 
 
-def delete_business(bid):
-    r = client.delete(f"/businesses/{bid}")
-    return r.status_code, r.json()
+def delete_business(business_id):
+    response = client.delete(f"/businesses/{business_id}")
+    return response.status_code, response.json()
 
 
 def export_csv(path="demo_businesses.csv"):
@@ -79,8 +87,8 @@ def export_csv(path="demo_businesses.csv"):
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for b in businesses:
-            writer.writerow({k: b.get(k) for k in fieldnames})
+        for business in businesses:
+            writer.writerow({key: business.get(key) for key in fieldnames})
     return path
 
 
@@ -90,17 +98,17 @@ if __name__ == "__main__":
     print("Creating demo data...")
     created = create_demo_data()
     print("Created:")
-    for c in created:
-        print(f" - {c['id']}: {c['name']} (lead_score={c.get('lead_score')})")
+    for business in created:
+        print(f" - {business['id']}: {business['name']} (lead_score={business.get('lead_score')})")
 
     print("\nListing businesses:")
-    for b in list_businesses():
-        print(f" - {b['id']}: {b['name']} (lead_score={b['lead_score']})")
+    for business in list_businesses():
+        print(f" - {business['id']}: {business['name']} (lead_score={business['lead_score']})")
 
     first_id = created[0]["id"]
     print(f"\nGet business {first_id}:")
-    status, biz = get_business(first_id)
-    print(status, biz)
+    status, business = get_business(first_id)
+    print(status, business)
 
     print("\nUpdating first business name...")
     status, updated = update_business(first_id, {"name": "Demo Coffee Updated"})
@@ -115,7 +123,7 @@ if __name__ == "__main__":
     print(status, deleted)
 
     print("\nFinal list:")
-    for b in list_businesses():
-        print(f" - {b['id']}: {b['name']} (lead_score={b['lead_score']})")
+    for business in list_businesses():
+        print(f" - {business['id']}: {business['name']} (lead_score={business['lead_score']})")
 
     print("\nDemo complete.")

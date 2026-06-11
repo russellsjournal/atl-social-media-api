@@ -1,9 +1,9 @@
 from typing import Optional
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 
 class BusinessBase(BaseModel):
-    name: str = Field(..., example="ATL Coffee Co.")
+    name: str = Field(..., json_schema_extra={"example": "ATL Coffee Co."})
     neighborhood: Optional[str] = None
     category: Optional[str] = None
     website: Optional[HttpUrl] = None
@@ -31,8 +31,7 @@ class BusinessUpdate(BaseModel):
 
 
 class Business(BusinessBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     lead_score: float = 0.0
-
-    class Config:
-        orm_mode = True

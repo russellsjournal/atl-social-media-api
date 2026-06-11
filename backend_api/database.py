@@ -14,7 +14,7 @@ class InMemoryDB:
         return next((b for b in self._businesses if b.id == business_id), None)
 
     def create_business(self, data: BusinessCreate) -> Business:
-        business = Business(id=self._next_id, **data.dict(), lead_score=0.0)
+        business = Business(id=self._next_id, **data.model_dump(), lead_score=0.0)
         self._businesses.append(business)
         self._next_id += 1
         return business
@@ -24,7 +24,7 @@ class InMemoryDB:
         if not business:
             return None
 
-        update_data = data.dict(exclude_unset=True)
+        update_data = data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(business, key, value)
         return business

@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+automation_suite/business_lead_scores.csv
+demo_businesses.csv
+demo/demo_businesses.csv

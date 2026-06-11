@@ -1,4 +1,4 @@
-"""
+r"""
 CLI for managing businesses via the backend API.
 Usage examples:
   py cli_tools\cli.py list

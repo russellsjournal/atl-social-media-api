@@ -3,11 +3,11 @@
 Lightweight FastAPI service and tools for collecting and scoring local business leads.
 
 Contents
-- `backend_api/` — FastAPI app, in-memory DB, lead scoring logic
-- `automation_suite/` — scripts to seed sample data and export lead scores
-- `cli_tools/` — small CLI to manage businesses via the API
-- `demo/` — in-process demo that exercises the API using TestClient
-- `tests/` — unit and integration tests (pytest)
+- `backend_api/` - FastAPI app, in-memory DB, lead scoring logic
+- `automation_suite/` - scripts to seed sample data and export lead scores
+- `cli_tools/` - small CLI to manage businesses via the API
+- `demo/` - in-process demo that exercises the API using TestClient
+- `tests/` - unit and integration tests (pytest)
 
 Quick start
 1. Create and activate a virtual environment (Windows PowerShell):
@@ -49,4 +49,3 @@ python -m pytest -q
 Notes
 - The backend uses an in-memory DB (`backend_api.database.InMemoryDB`) for simplicity. Data is not persisted between runs.
 - If PowerShell blocks script execution, use `py` to run scripts or adjust `Set-ExecutionPolicy` for your user.
-
