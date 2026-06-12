@@ -18,6 +18,12 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
+def test_homepage():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "Atlanta Business Directory" in response.text
+
+
 def test_crud_business_lifecycle_and_filters():
     payload1 = {
         "name": "Test Biz 1",

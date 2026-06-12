@@ -1,13 +1,67 @@
-from fastapi import FastAPI, HTTPException, Query
+from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import List, Optional
 
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .database import db
 from .schemas import Business, BusinessCreate, BusinessUpdate
 from .lead_scoring import calculate_lead_score
 
-app = FastAPI()
+BASE_DIR = Path(__file__).resolve().parent.parent
+STATIC_DIR = BASE_DIR / "static"
+
+
+SAMPLE_BUSINESSES = [
+    BusinessCreate(
+        name="Little Five Coffee",
+        neighborhood="Little Five Points",
+        category="Cafe",
+        website="https://example.com/little-five-coffee",
+        has_instagram=True,
+        has_facebook=True,
+        reviews_count=128,
+        avg_rating=4.7,
+    ),
+    BusinessCreate(
+        name="West End Wellness",
+        neighborhood="West End",
+        category="Health",
+        website="https://example.com/west-end-wellness",
+        has_instagram=True,
+        reviews_count=42,
+        avg_rating=4.5,
+    ),
+    BusinessCreate(
+        name="Grant Park Books",
+        neighborhood="Grant Park",
+        category="Retail",
+        has_facebook=True,
+        reviews_count=23,
+        avg_rating=4.4,
+    ),
+]
+
+
+def seed_demo_businesses() -> None:
+    if db.list_businesses():
+        return
+
+    for payload in SAMPLE_BUSINESSES:
+        business = db.create_business(payload)
+        business.lead_score = calculate_lead_score(business)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    seed_demo_businesses()
+    yield
+
+
+app = FastAPI(title="Atlanta Business Directory", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,6 +69,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.get("/", include_in_schema=False)
+def homepage():
+    return FileResponse(STATIC_DIR / "index.html")
+
 
 @app.get("/health")
 def health_check():

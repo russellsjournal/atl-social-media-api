@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Atlanta Business Directory</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">Local lead directory</p>
+        <h1>Atlanta Business Directory</h1>
+        <p class="lede">Browse local businesses, filter by neighborhood or category, and see lead scores generated from business signals.</p>
+      </div>
+      <a class="api-link" href="/docs">API Docs</a>
+    </header>
+
+    <main>
+      <section class="toolbar" aria-label="Directory filters">
+        <label>
+          Neighborhood
+          <input id="neighborhood" type="search" placeholder="West End">
+        </label>
+        <label>
+          Category
+          <input id="category" type="search" placeholder="Cafe">
+        </label>
+        <label>
+          Minimum lead score
+          <input id="score" type="number" min="0" max="100" step="1" placeholder="50">
+        </label>
+        <button id="apply" type="button">Apply</button>
+        <button id="clear" type="button" class="secondary">Clear</button>
+      </section>
+
+      <section class="summary" aria-live="polite">
+        <strong id="count">0</strong>
+        <span>businesses found</span>
+      </section>
+
+      <section id="businesses" class="business-grid" aria-label="Businesses"></section>
+      <p id="empty" class="empty" hidden>No businesses match those filters.</p>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
